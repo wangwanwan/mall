@@ -12,7 +12,7 @@ SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-SET @IMAGE_BASE_URL = " https://product-1257269719.cos.ap-shanghai.myqcloud.com"; -- FOR EXAMPLE: https://*****.ap-shanghai.myqcloud.com/
+SET @IMAGE_BASE_URL = " https://product-1257269719.cos.ap-shanghai.myqcloud.com/"; -- FOR EXAMPLE: https://*****.ap-shanghai.myqcloud.com/
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -69,7 +69,7 @@ CREATE TABLE `order_user` (
 --
 -- 表的结构 `product`
 --
-
+drop product;
 CREATE TABLE `product` (
   `id` int(11) NOT NULL COMMENT 'id',
   `image` varchar(255) NOT NULL COMMENT '图片',
