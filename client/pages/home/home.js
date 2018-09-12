@@ -1,5 +1,6 @@
 // pages/home/home.js
 var qcloud = require('../../vendor/wafer2-client-sdk/index.js');
+const config = require('../../config.js');
 Page({
 
   /**
@@ -13,18 +14,35 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
+    this.getProductList();  
+  },
+
+  getProductList() {
+    wx.showLoading({
+      title: '商品数据加载中...',
+    })
     qcloud.request({
-      url: 'https://ovtmnooq.qcloud.la/weapp/product',
+      url: config.service.productList,
       success: result => {
-        this.setData({
-          productList: result.data.data
-        })
+        wx.hideLoading();
+        console.log(result);
+        if(!result.data.code) {
+          this.setData({
+            productList: result.data.data
+          })
+        } else {
+          wx.showToast({
+            title: '商品数据加载失败...',
+          })
+        }
       },
       fail: result => {
-
+        wx.hideLoading();
+        wx.showToast({
+          title: '商品数据加载失败...',
+        })
       }
     })
-  
   },
 
   /**
