@@ -6,8 +6,7 @@
 }
 .product-image {
   display: block; 
-  margin: 0 auto; 
-  margin-left: 100rpx;
+  margin: 0 auto;
   width: 370rpx;
   height: 370rpx;
 }
