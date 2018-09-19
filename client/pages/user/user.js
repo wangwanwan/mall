@@ -1,15 +1,17 @@
 // pages/user/user.js
+var qcloud = require('../../vendor/wafer2-client-sdk/index.js');
+const config = require('../../config.js');
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-    // userInfo: null,
-    userInfo: {
-      nickName: "优达学城",
-      avatarUrl: "", // 头像 URL 地址
-    } // 虚拟数据
+    userInfo: null
+    // userInfo: {
+    //   nickName: "优达学城",
+    //   avatarUrl: "", // 头像 URL 地址
+    // } // 虚拟数据
   },
   onTapAddress() {
     wx.showToast({
@@ -28,7 +30,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-  
+
   },
 
   /**
@@ -78,5 +80,60 @@ Page({
    */
   onShareAppMessage: function () {
   
+  },
+
+  onTapLogin: function () {
+    this.doQcloudLogin({
+      success: ({ userInfo }) => {
+        this.setData({
+          userInfo
+        })
+      }
+    })
+  },
+
+  doQcloudLogin({ success, error }) {
+    // 调用 qcloud 登陆接口
+    qcloud.login({
+      success: result => {
+        if (result) {
+          console.log('1111111111111');
+          let userInfo = result
+          success && success({
+            userInfo
+          })
+        } else {
+          // 如果不是首次登录，不会返回用户信息，请求用户信息接口获取
+          console.log('22222222222');
+          this.getUserInfo({ success, error })
+        }
+      },
+      fail: () => {
+        error && error()
+      }
+    })
+  },
+
+  getUserInfo: function ({success, error}) {
+    qcloud.request({
+      url: config.service.requestUrl,
+      login: true,
+      success: res => {
+        console.log(res);
+        let data = res.data
+        if (!data.code) {
+          let userInfo = data.data
+          success && success({
+            userInfo
+          })
+        } else {
+          error && error()
+        }
+      },
+      fail: res => {
+        error && error()
+      }
+    }
+    )
   }
 })
