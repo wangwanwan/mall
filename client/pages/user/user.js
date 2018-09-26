@@ -1,17 +1,17 @@
 // pages/user/user.js
 var qcloud = require('../../vendor/wafer2-client-sdk/index.js');
 const config = require('../../config.js');
+const UNPROMPTED = 0;
+const UNAUTHORIZED = 1;
+const AUTHORIZED = 2;
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-    userInfo: null
-    // userInfo: {
-    //   nickName: "优达学城",
-    //   avatarUrl: "", // 头像 URL 地址
-    // } // 虚拟数据
+    userInfo: null,
+    locationAuthType: UNPROMPTED
   },
   onTapAddress() {
     wx.showToast({
@@ -30,7 +30,14 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-
+    this.checkSession({
+      success: ({ userInfo }) => {
+        this.setData({
+          userInfo: userInfo
+        })
+      },
+      error: () => { }
+    })
   },
 
   /**
@@ -83,7 +90,7 @@ Page({
   },
 
   onTapLogin: function () {
-    this.doQcloudLogin({
+    this.login({
       success: ({ userInfo }) => {
         this.setData({
           userInfo
@@ -114,13 +121,35 @@ Page({
     })
   },
 
+  login({ success, error }) {
+    wx.getSetting({
+      success: res => {
+        if (res.authSetting['scope.userInfo'] === false) {
+          this.setData({
+            locationAuthType: UNAUTHORIZED
+          })
+          // 已拒绝授权
+          wx.showModal({
+            title: '提示',
+            content: '请授权我们获取您的用户信息',
+            showCancel: false
+          })
+        } else {
+          this.setData({
+            locationAuthType: AUTHORIZED
+          })
+          this.doQcloudLogin({ success, error })
+        }
+      }
+    })
+  },
+
   getUserInfo: function ({success, error}) {
     qcloud.request({
       url: config.service.requestUrl,
       login: true,
-      success: res => {
-        console.log(res);
-        let data = res.data
+      success: result => {
+        let data = result.data
         if (!data.code) {
           let userInfo = data.data
           success && success({
@@ -130,10 +159,21 @@ Page({
           error && error()
         }
       },
-      fail: res => {
+      fail: () => {
         error && error()
       }
-    }
-    )
+    })
+  },
+  checkSession({ success, error }) {
+    wx.checkSession({
+      success: () => {
+        console.log('checksession success');
+        this.getUserInfo({ success, error })
+      },
+      fail: () => {
+        console.log('checksession fail');
+        error && error()
+      }
+    })
   }
 })
